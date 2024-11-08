@@ -47,7 +47,7 @@ async def match_face(file: UploadFile = File(...)):
                     face_id = match['Face']['FaceId']
                     confidence = match['Face']['Confidence']
 
-                    # Retrieve the person's name from DynamoDB using the Face ID
+                    # Retrieve the person's name and roll number from DynamoDB using the Face ID
                     face = dynamodb.get_item(
                         TableName='facerecognition',
                         Key={'RekognitionId': {'S': face_id}}
@@ -58,36 +58,80 @@ async def match_face(file: UploadFile = File(...)):
                         roll_no = face['Item']['RollNumber']['S']
                         current_date = datetime.now().strftime('%Y-%m-%d')
 
-                        try:
-                            update_response = dynamodb.update_item(
-                                TableName='attandance',
-                                Key={'RollNo': {'S': roll_no}},
-                                UpdateExpression="SET FullName = :fullname, DatesPresent = list_append(if_not_exists(DatesPresent, :empty_list), :new_date)",
-                                ConditionExpression="attribute_not_exists(DatesPresent) OR NOT contains(DatesPresent, :current_date)",
-                                ExpressionAttributeValues={
-                                    ':fullname': {'S': full_name},
-                                    ':new_date': {'L': [{'S': current_date}]},
-                                    ':empty_list': {'L': []},
-                                    ':current_date': {'S': current_date}
-                                }
-                            )
-                            print("UpdateItem response:", update_response)
+                        # Retrieve existing attendance data for the user
+                        existing_data = dynamodb.get_item(
+                            TableName='attandance',
+                            Key={'RollNo': {'S': roll_no}}
+                        )
 
-                            return {
-                                "status": "success",
-                                "message": f"Face matched with {full_name}. Attendance recorded.",
-                                "confidence": confidence,
-                                "roll_no": roll_no,
-                                "date": current_date
-                            }
-                        except ClientError as e:
-                            print("Error updating item in DynamoDB:", e)
-                            raise HTTPException(status_code=500, detail=f"Failed to record attendance: {str(e)}")
+                        # Check if there is already an attendance record
+                        if 'Item' in existing_data:
+                            existing_dates = [date['S'] for date in existing_data['Item'].get('DatesPresent', {}).get('L', [])]
+                            print(current_date+" - \n")
+                            print(existing_dates)
+                            # Check if today's date is already present in the attendance record
+                            if current_date in existing_dates:
+                                return {
+                                    "status": "info",
+                                    "message": f"Attendance already taken for {full_name} on {current_date} successfully.",
+                                    "confidence": confidence,
+                                    "roll_no": roll_no,
+                                    "date": current_date
+                                }
+
+                            # If today's date is not present, update the record to add it
+                            else:
+                                try:
+                                    update_response = dynamodb.update_item(
+                                        TableName='attandance',
+                                        Key={'RollNo': {'S': roll_no}},
+                                        UpdateExpression="SET FullName = :fullname, DatesPresent = list_append(DatesPresent, :new_date)",
+                                        ExpressionAttributeValues={
+                                            ':fullname': {'S': full_name},
+                                            ':new_date': {'L': [{'S': current_date}]}
+                                        }
+                                    )
+                                    print("UpdateItem response:", update_response)
+
+                                    return {
+                                        "status": "success",
+                                        "message": f"Face matched with {full_name}. Attendance recorded.",
+                                        "confidence": confidence,
+                                        "roll_no": roll_no,
+                                        "date": current_date
+                                    }
+
+                                except ClientError as e:
+                                    print("Error updating item in DynamoDB:", e)
+                                    raise HTTPException(status_code=500, detail=f"Failed to record attendance: {str(e)}")
+
+                        # If no previous attendance record exists, create a new one with today's date
+                        else:
+                            try:
+                                dynamodb.put_item(
+                                    TableName='attandance',
+                                    Item={
+                                        'RollNo': {'S': roll_no},
+                                        'FullName': {'S': full_name},
+                                        'DatesPresent': {'L': [{'S': current_date}]}
+                                    }
+                                )
+                                return {
+                                    "status": "success",
+                                    "message": f"Face matched with {full_name}. Attendance recorded.",
+                                    "confidence": confidence,
+                                    "roll_no": roll_no,
+                                    "date": current_date
+                                }
+
+                            except ClientError as e:
+                                print("Error creating item in DynamoDB:", e)
+                                raise HTTPException(status_code=500, detail=f"Failed to record attendance: {str(e)}")
 
             # If no match is found
             return {
                 "status": "error",
-                "message": "Face not recognized"
+                "message": "Face not recognized. Please try again."
             }
 
         except ClientError as e:

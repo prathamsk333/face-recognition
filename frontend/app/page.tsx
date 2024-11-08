@@ -1,11 +1,14 @@
-"use client"
+"use client";
 
 import Image from "next/image"
 import Link from "next/link"
+import { useEffect } from "react";
 
 export default function LandingPage() {
+
+  
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div  className="flex flex-col min-h-screen bg-white">
       <header className="px-4 lg:px-6 h-16 flex items-center border-b border-gray-200">
         <Link className="flex items-center justify-center" href="#">
           <span className="sr-only">IIIT Kottayam</span>
@@ -36,12 +39,18 @@ export default function LandingPage() {
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <a
+                  <Link
                     className="inline-flex h-10 items-center justify-center rounded-md bg-green-600 px-8 text-sm font-medium text-white shadow transition-colors hover:bg-green-700 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-green-700"
                     href="/capture"
                   >
                     Get Started
-                  </a>
+                  </Link>
+                  <Link
+                    className="inline-flex h-10 items-center justify-center rounded-md bg-green-600 px-8 text-sm font-medium text-white shadow transition-colors hover:bg-green-700 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-green-700"
+                    href="/attendance"
+                  >
+                    Check Attendance
+                  </Link>
                 </div>
               </div>
               <Image
@@ -164,7 +173,7 @@ export default function LandingPage() {
         </section>
       </main>
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
-        <p className="text-xs text-gray-500">© 2024 IIIT Kottayam. All rights reserved.</p>
+        <p className="text-xs text-gray-500">© 2024 Pratham S K. All rights reserved.</p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link className="text-xs hover:underline underline-offset-4 text-gray-500" href="#">
             Terms of Service

@@ -3,6 +3,7 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
 
 export default function MainPage() {
   const [isWebcamActive, setIsWebcamActive] = useState(false);
@@ -53,7 +54,6 @@ export default function MainPage() {
   const sendImageToServer = useCallback(async (imageDataUrl: string) => {
     setIsLoading(true);
     try {
-      // Convert the Data URL to a Blob
       const byteString = atob(imageDataUrl.split(",")[1]);
       const ab = new ArrayBuffer(byteString.length);
       const ua = new Uint8Array(ab);
@@ -76,7 +76,9 @@ export default function MainPage() {
       if (response.data.status === "success") {
         setMessage("Attendance recorded successfully!");
         console.log("success");
-        console.log(response)
+        console.log(response);
+      } else if (response.data.status === "info") {
+        setMessage("Attendance has already been successfully recorded.");
       } else {
         setMessage("Face not recognized. Please try again.");
         console.log("failure");
@@ -106,6 +108,14 @@ export default function MainPage() {
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="flex justify-between items-center">
+        <Link href="../">
+          <button className=" rounded-xl bg-green-600 text-white w-[6.5rem] h-[2.5rem]">
+            Back
+          </button>
+        </Link>
+
+      </div>
       <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
         <div className="md:flex">
           <div className="p-8">
