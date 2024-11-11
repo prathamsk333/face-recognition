@@ -4,10 +4,7 @@ s3 = boto3.resource('s3')
 
 # List of images with full name and roll number
 images = [
-    ('image1.jpeg', 'Pratham S Kore', '2023BCS0201'),
-    ('image2.jpeg', 'Pratham S Kore', '2023BCS0201'),
-    ('image3.jpeg', 'Pratham S Kore', '2023BCS0201'),
-    ('image4.jpeg', 'Pratham S Kore', '2023BCS0201'),
+    ('denzel.jpeg', 'Denzel', '2023BCS0189'),
 ]
 
 # Iterate through list to upload objects to S3   

@@ -66,7 +66,7 @@ export default function MainPage() {
       formData.append("file", file, "image.jpg");
 
       const response = await axios.post(
-        "http://127.0.0.1:8000/match-face/",
+        "https://optaend.prathamsk.me/match-face/",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },

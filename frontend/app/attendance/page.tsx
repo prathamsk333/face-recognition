@@ -27,7 +27,7 @@ export default function AttendanceRecords() {
     setLoading(true)
     setError(null)
     try {
-      const response = await axios.get<AttendanceData>(`http://localhost:8000/attendance/${rollNo}`)
+      const response = await axios.get<AttendanceData>(`https://optaend.prathamsk.me/attendance/${rollNo}`)
       setAttendanceData(response.data)
     } catch (err) {
       setError("Failed to fetch attendance data. Please check the roll number and try again.")
